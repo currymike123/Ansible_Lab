@@ -8,7 +8,7 @@
   vars:
     admin_username: "csadmin"
     student_username: "student"
-    deprecated_username: "Test"
+    deprecated_username: "test"
 
   tasks:
     - name: Remove the old Test account and purge its home directory
