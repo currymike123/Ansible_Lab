@@ -1,0 +1,42 @@
+name: Setup Lab Accounts and Remove Test Account
+hosts: nucs
+become: true
+
+vars_files:
+  - secrets.yml
+
+vars:
+  admin_username: "csadmin"
+  student_username: "student"
+  deprecated_username: "Test"
+
+tasks:
+  - name: Remove the old Test account and purge its home directory
+    ansible.builtin.user:
+      name: "{{ deprecated_username }}"
+      state: absent
+      remove: true
+
+  - name: Ensure local admin account exists
+    ansible.builtin.user:
+      name: "{{ admin_username }}"
+      password: "{{ vault_admin_hash }}"
+      groups: sudo
+      shell: /bin/bash
+      state: present
+      create_home: true
+
+  - name: Ensure passwordless sudo for local admin
+    ansible.builtin.copy:
+      dest: /etc/sudoers.d/{{ admin_username }}
+      content: "{{ admin_username }} ALL=(ALL) NOPASSWD: ALL"
+      validate: /usr/sbin/visudo -cf %s
+      mode: 0440
+
+  - name: Ensure local student account exists
+    ansible.builtin.user:
+      name: "{{ student_username }}"
+      password: "{{ vault_student_hash }}"
+      shell: /bin/bash
+      state: present
+      create_home: true
