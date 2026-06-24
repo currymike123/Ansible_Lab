@@ -2,41 +2,53 @@
   hosts: nucs
   become: true
 
+  # Load the encrypted passwords from our vault file.
   vars_files:
     - secrets.yml
 
+  # Define the usernames we'll be working with throughout the playbook.
   vars:
     admin_username: "csadmin"
     student_username: "student"
     deprecated_username: "test"
 
   tasks:
-    - name: Remove the old Test account and purge its home directory
+    # We need to remove the old 'test' user.
+    # The 'remove: true' flag also deletes the user's home directory, keeping things clean.
+    # Using 'force: true' is the Ansible way to remove a user even if they are logged in.
+    - name: Remove the old Test account and delete its home directory
       ansible.builtin.user:
         name: "{{ deprecated_username }}"
         state: absent
         remove: true
+        force: true
 
     - name: Ensure local admin account exists
+      # Create our main admin account for the lab.
+      # The password hash is pulled from the encrypted secrets.yml file.
       ansible.builtin.user:
         name: "{{ admin_username }}"
         password: "{{ vault_admin_hash }}"
-        groups: sudo
+        groups: sudo # Add this user to the sudo group for admin rights.
         shell: /bin/bash
         state: present
         create_home: true
 
-    - name: Ensure passwordless sudo for local admin
-      ansible.builtin.copy:
-        dest: /etc/sudoers.d/{{ admin_username }}
-        content: "{{ admin_username }} ALL=(ALL) NOPASSWD: ALL"
-        validate: /usr/sbin/visudo -cf %s
-        mode: 0440
-
     - name: Ensure local student account exists
+      # This sets up the generic student account for the lab.
+      # The password hash is also pulled from the vault.
       ansible.builtin.user:
         name: "{{ student_username }}"
         password: "{{ vault_student_hash }}"
         shell: /bin/bash
         state: present
+        # 'append: true' is important here. It makes sure the student user is
+        # added to the default groups needed for a proper login session.
+        append: true
         create_home: true
+
+    # Last step is to reboot. This makes sure all changes, especially user
+    # group memberships and system settings, are fully applied.
+    - name: Reboot the machine to apply all changes
+      ansible.builtin.reboot:
+        msg: "Reboot initiated by Ansible."
