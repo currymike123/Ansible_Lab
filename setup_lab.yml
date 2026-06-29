@@ -1,5 +1,4 @@
 - name: Setup Lab Accounts and Remove Test Account
-  hosts: nucs
   hosts: new_nucs
   become: true
 
