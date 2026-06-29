@@ -7,7 +7,7 @@
 # Check if the first argument passed to the script is "setup"
 if [ "$1" == "setup" ]; then
     echo "Running the NUC setup playbook..."
-    ansible-playbook -i inventory.ini setup_lab.yml --ask-vault-pass
+    ansible-playbook -i inventory.ini setup_lab.yml --ask-vault-pass --ask-pass
 else
     echo "Usage: ./nuc setup"
     exit 1

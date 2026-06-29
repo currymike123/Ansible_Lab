@@ -9,7 +9,11 @@ Currently, only the `nuc01` NUC is configured in the inventory file. The other N
 
 To Run the Playbook in setup mode, run the following command from the control machine:
 ```bash
-./nuc.sh setup
+# First, make the script executable (you only need to do this once).
+chmod +x nuc
+
+# Then, run the setup from within the project directory:
+./nuc setup
 ```
 
 Additonal Playbooks will be created to reset and configure the NUCs as needed. 
