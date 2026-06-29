@@ -51,6 +51,8 @@
       ansible.builtin.user:
         name: "{{ student_username }}"
         password: "{{ vault_student_hash }}"
+        # Explicitly set groups to ensure a working interactive login.
+        groups: "users,video,audio"
         shell: /bin/bash
         state: present
         # 'append: true' is important here. It makes sure the student user is
