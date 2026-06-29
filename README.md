@@ -12,12 +12,11 @@ To Run the Playbook in setup mode, run the following command from the control ma
 # First, make the script executable (you only need to do this once).
 chmod +x nuc.sh
 
-# Setup is for the first time you are configuring the NUCs. They should only have the test account on them at this point. The setup will create the lab accounts and configure the NUCs for use in the lab.
+# Setup is for the first time you are configuring the NUCs. The NUC should only have the test account on them at this point. The setup will create the lab accounts and configure the NUCs for use.
 # Run the setup from within the project directory:
 ./nuc.sh setup
 
-# Reset is for when you want to reset the csadmin and student accounts on the NUCs. This will remove the lab accounts and reset the NUCs to their original state.
-# To update or reset accounts on an already configured NUC:
+# To reset accounts on an already configured NUC:
 ./nuc.sh reset
 ```
 
