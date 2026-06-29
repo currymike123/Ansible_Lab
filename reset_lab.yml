@@ -1,5 +1,5 @@
 - name: Reset Lab Accounts
-  hosts: nucs
+  hosts: configured_nucs
   become: true
 
   # Load the encrypted passwords from our vault file.

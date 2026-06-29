@@ -3,6 +3,10 @@
 # This script is a simple wrapper for running our Ansible playbook.
 # It saves us from having to remember and type the full command every time.
 
+# Disable SSH host key checking. This is useful for lab environments where
+# you are frequently provisioning new machines and trust the network.
+export ANSIBLE_HOST_KEY_CHECKING=False
+
 
 # Check if the first argument passed to the script is "setup"
 if [[ "$1" == "setup" ]]; then
