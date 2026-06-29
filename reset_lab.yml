@@ -29,6 +29,7 @@
       ansible.builtin.user:
         name: "{{ student_username }}"
         password: "{{ vault_student_hash }}"
+        update_password: on_create
         # Explicitly set groups to ensure a working interactive login.
         groups: "users,video,audio"
         shell: /bin/bash

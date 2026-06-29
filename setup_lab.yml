@@ -13,33 +13,13 @@
     deprecated_username: "test"
 
   tasks:
-    # To prevent sudo password prompts when removing the user we are connected as,
-    # we'll temporarily grant passwordless sudo to the 'test' user.
-    # This sudoers file becomes an orphaned (but harmless) rule after the 'test'
-    # user is deleted, ensuring the temporary privilege is not left for a valid user.
-    - name: Temporarily grant passwordless sudo to the test user
-      ansible.builtin.copy:
-        dest: "/etc/sudoers.d/99-ansible-{{ deprecated_username }}"
-        content: "{{ deprecated_username }} ALL=(ALL) NOPASSWD: ALL"
-        validate: /usr/sbin/visudo -cf %s
-        mode: '0440'
-
-    # We need to remove the old 'test' user.
-    # The 'remove: true' flag also deletes the user's home directory, keeping things clean.
-    # Using 'force: true' is the Ansible way to remove a user even if they are logged in.
-    - name: Remove the old Test account and delete its home directory
-      ansible.builtin.user:
-        name: "{{ deprecated_username }}"
-        state: absent
-        remove: true
-        force: true
-
     - name: Ensure local admin account exists
       # Create our main admin account for the lab.
       # The password hash is pulled from the encrypted secrets.yml file.
       ansible.builtin.user:
         name: "{{ admin_username }}"
         password: "{{ vault_admin_hash }}"
+        update_password: on_create
         groups: sudo # Add this user to the sudo group for admin rights.
         shell: /bin/bash
         state: present
@@ -51,6 +31,7 @@
       ansible.builtin.user:
         name: "{{ student_username }}"
         password: "{{ vault_student_hash }}"
+        update_password: on_create
         # Explicitly set groups to ensure a working interactive login.
         groups: "users,video,audio"
         shell: /bin/bash
@@ -59,6 +40,22 @@
         # added to the default groups needed for a proper login session.
         append: true
         create_home: true
+
+    - name: Reset SSH connection to log in as the new admin user
+      ansible.builtin.meta:
+        reset_connection
+
+    - name: Remove the old Test account and delete its home directory
+      # Now that we are connected as csadmin, we can safely delete the test user.
+      ansible.builtin.user:
+        name: "{{ deprecated_username }}"
+        state: absent
+        remove: true
+        force: true
+      # This task will now run with the csadmin user's sudo privileges.
+      become: true
+      vars:
+        ansible_user: "{{ admin_username }}"
 
     # Last step is to reboot. This makes sure all changes, especially user
     # group memberships and system settings, are fully applied.
