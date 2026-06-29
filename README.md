@@ -14,6 +14,9 @@ chmod +x nuc.sh
 
 # Then, run the setup from within the project directory:
 ./nuc.sh setup
+
+# To update or reset accounts on an already configured NUC:
+./nuc.sh reset
 ```
 
 Additonal Playbooks will be created to reset and configure the NUCs as needed. 

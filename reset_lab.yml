@@ -1,0 +1,41 @@
+- name: Reset Lab Accounts
+  hosts: nucs
+  become: true
+
+  # Load the encrypted passwords from our vault file.
+  vars_files:
+    - secrets.yml
+
+  # Define the usernames we'll be working with throughout the playbook.
+  vars:
+    admin_username: "csadmin"
+    student_username: "student"
+
+  tasks:
+    - name: Ensure local admin account exists
+      # Create or update our main admin account for the lab.
+      # The password hash is pulled from the encrypted secrets.yml file.
+      ansible.builtin.user:
+        name: "{{ admin_username }}"
+        password: "{{ vault_admin_hash }}"
+        groups: sudo # Add this user to the sudo group for admin rights.
+        shell: /bin/bash
+        state: present
+        create_home: true
+
+    - name: Ensure local student account exists
+      # This sets up or updates the generic student account for the lab.
+      # The password hash is also pulled from the vault.
+      ansible.builtin.user:
+        name: "{{ student_username }}"
+        password: "{{ vault_student_hash }}"
+        shell: /bin/bash
+        state: present
+        # 'append: true' is important here. It makes sure the student user is
+        # added to the default groups needed for a proper login session.
+        append: true
+        create_home: true
+
+    - name: Reboot the machine to apply all changes
+      ansible.builtin.reboot:
+        msg: "Reboot initiated by Ansible."

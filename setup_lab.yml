@@ -13,6 +13,17 @@
     deprecated_username: "test"
 
   tasks:
+    # To prevent sudo password prompts when removing the user we are connected as,
+    # we'll temporarily grant passwordless sudo to the 'test' user.
+    # This sudoers file will be automatically removed when the 'test' user's
+    # home directory is purged in the next task.
+    - name: Temporarily grant passwordless sudo to the test user
+      ansible.builtin.copy:
+        dest: "/etc/sudoers.d/99-ansible-{{ deprecated_username }}"
+        content: "{{ deprecated_username }} ALL=(ALL) NOPASSWD: ALL"
+        validate: /usr/sbin/visudo -cf %s
+        mode: '0440'
+
     # We need to remove the old 'test' user.
     # The 'remove: true' flag also deletes the user's home directory, keeping things clean.
     # Using 'force: true' is the Ansible way to remove a user even if they are logged in.
