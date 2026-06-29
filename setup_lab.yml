@@ -1,5 +1,6 @@
 - name: Setup Lab Accounts and Remove Test Account
   hosts: nucs
+  hosts: new_nucs
   become: true
 
   # Load the encrypted passwords from our vault file.
@@ -24,6 +25,14 @@
         shell: /bin/bash
         state: present
         create_home: true
+
+    - name: Grant passwordless sudo to the new admin user
+      # This allows us to reconnect as csadmin and use sudo without a password prompt.
+      ansible.builtin.copy:
+        dest: "/etc/sudoers.d/99-ansible-{{ admin_username }}"
+        content: "{{ admin_username }} ALL=(ALL) NOPASSWD: ALL"
+        validate: /usr/sbin/visudo -cf %s
+        mode: '0440'
 
     - name: Ensure local student account exists
       # This sets up the generic student account for the lab.

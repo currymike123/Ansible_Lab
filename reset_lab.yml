@@ -18,6 +18,7 @@
       ansible.builtin.user:
         name: "{{ admin_username }}"
         password: "{{ vault_admin_hash }}"
+        update_password: on_create
         groups: sudo # Add this user to the sudo group for admin rights.
         shell: /bin/bash
         state: present
