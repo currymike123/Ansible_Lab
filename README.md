@@ -133,6 +133,7 @@ vault_student_hash: "$6$rounds=...[your_generated_hash_here]..."
 python3 -c "import crypt; print(crypt.crypt('Enter_Password_Here', crypt.mksalt(crypt.METHOD_SHA512)))"
 ```
 *Note:* Because the plaintext password is used in the command string, it may be saved in your shell history. You can usually prevent this by typing a space before the `python3` command, or simply clear your history afterward.
+
 *Note:* When you use python to generate the password hash, it will already contain the prefix `$6$rounds=...` which is required for SHA-512 hashes. You do not need to add this prefix manually.
 
 ### Running Playbooks with Secrets
