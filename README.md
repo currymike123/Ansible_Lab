@@ -83,9 +83,9 @@ You can change connection details mid-playbook by defining task-level variables.
     - name: Remove the old Test account and delete its home directory
       ansible.builtin.user:
         name: "{{ deprecated_username }}"
-        state: absent
-        remove: true
-        force: true
+        state: absent # state controls whether the user is created or deleted
+        remove: true # remove the user's home directory
+        force: true # force the removal of the user, even if they are logged in
       
       # We need elevated privileges to delete a user
       become: true
