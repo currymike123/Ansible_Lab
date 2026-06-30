@@ -1,4 +1,4 @@
-- name: Setup Lab Accounts and Remove Test Account
+- name: Play 1 - Bootstrap Accounts
   hosts: new_nucs
   become: true
 
@@ -33,10 +33,6 @@
         validate: /usr/sbin/visudo -cf %s
         mode: '0440' 
 
-    - name: Flush handlers and reset connection to apply sudoers change
-      ansible.builtin.meta:
-        reset_connection
-
     - name: Ensure local student account exists
       # This sets up the generic student account for the lab.
       # The password hash is also pulled from the vault.
@@ -53,24 +49,23 @@
         append: true
         create_home: true
 
-    - name: Reset SSH connection to log in as the new admin user
-      ansible.builtin.meta:
-        reset_connection
-
-    - name: Remove the old Test account and delete its home directory
-      # Now that we are connected as csadmin, we can safely delete the test user.
+- name: Play 2 - Finalize Cleanup
+  hosts: new_nucs
+  become: true
+  # This play will connect as the newly created admin user.
+  vars:
+    admin_username: "csadmin"
+    deprecated_username: "test"
+    ansible_user: "{{ admin_username }}"
+  
+  tasks:
+    - name: Remove the old Test account
       ansible.builtin.user:
         name: "{{ deprecated_username }}"
         state: absent
         remove: true
         force: true
-      # This task will now run with the csadmin user's sudo privileges.
-      become: true
-      vars:
-        ansible_user: "{{ admin_username }}"
 
-    # Last step is to reboot. This makes sure all changes, especially user
-    # group memberships and system settings, are fully applied.
     - name: Reboot the machine to apply all changes
       ansible.builtin.reboot:
         msg: "Reboot initiated by Ansible."
