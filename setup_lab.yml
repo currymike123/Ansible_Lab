@@ -31,7 +31,11 @@
         dest: "/etc/sudoers.d/99-ansible-{{ admin_username }}"
         content: "{{ admin_username }} ALL=(ALL) NOPASSWD: ALL"
         validate: /usr/sbin/visudo -cf %s
-        mode: '0440'
+        mode: '0440' 
+
+    - name: Flush handlers and reset connection to apply sudoers change
+      ansible.builtin.meta:
+        reset_connection
 
     - name: Ensure local student account exists
       # This sets up the generic student account for the lab.
