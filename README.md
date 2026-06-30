@@ -2,9 +2,11 @@
 
 This repository contains Ansible playbooks for setting up lab accounts for the 24 NUCs in the lab. The playbooks are designed to be run from a control machine that has Ansible installed and is able to connect to the NUCs over SSH.
 
-Currently, only the `nuc01` NUC is configured in the inventory file. The other NUCs are ignored for now, but can be added to the inventory file as needed once the playbook is tested and working correctly.
+Currently, only a few of the NUCs are configured in the inventory file. The other NUCs are ignored for now, but can be added to the inventory file as needed once the playbook is tested and working correctly.
 
 - The inventory file lists the NUCs in the lab and their corresponding IP addresses. 
+    - '[configured_nucs]' is the group of NUCs that have already been configured and are ready for use. The 'test' account is removed.
+    - '[new_nucs]' is the group of NUCs that have not yet been configured. The 'test' account is still present on these NUCs.
 - The setup_lab.yml playbook creates a new user account on each NUC.
 
 To Run the Playbook in setup mode, run the following command from the control machine:
