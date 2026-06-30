@@ -98,3 +98,55 @@ You can change connection details mid-playbook by defining task-level variables.
       vars:
         ansible_user: "{{ admin_username }}"
 ````
+
+---
+
+# Secrets Management
+
+## Secrets File
+Sensitive information, such as password hashes, should be stored in a separate `secrets.yml` file. This file should be encrypted using Ansible Vault to prevent unauthorized access.
+
+### Managing the Vault File
+
+**1. Create a new encrypted file:**
+```bash
+ansible-vault create secrets.yml
+```
+*(You will be prompted to create and confirm a vault password.)*
+
+**2. Edit an existing encrypted file:**
+```bash
+ansible-vault edit secrets.yml
+```
+
+### File Structure (`secrets.yml`)
+Inside the encrypted file, define your variables using standard YAML syntax. For user passwords, Ansible requires the hashed version, not the plaintext password.
+
+```yaml
+# Example secrets.yml content
+vault_admin_hash: "$6$rounds=...[your_generated_hash_here]..."
+vault_student_hash: "$6$rounds=...[your_generated_hash_here]..."
+```
+
+*Tip: You can generate a SHA-512 password hash using Python directly in your terminal. Replace 'Enter_Password_Here' with your actual password:*
+```bash
+python3 -c "import crypt; print(crypt.crypt('Enter_Password_Here', crypt.mksalt(crypt.METHOD_SHA512)))"
+```
+*(Note: Because the plaintext password is used in the command string, it may be saved in your shell history. You can usually prevent this by typing a space before the `python3` command, or simply clear your history afterward.)*
+*(Note: When you use python to generate the password hash, it will already contain the prefix `$6$rounds=...` which is required for SHA-512 hashes. You do not need to add this prefix manually.)*
+
+### Running Playbooks with Secrets
+When executing a playbook that loads an encrypted `secrets.yml` file, you must provide Ansible with the vault password so it can decrypt the variables at runtime.
+
+**Option A: Prompt for password (Interactive)**
+This is the most secure method for manual runs.
+```bash
+ansible-playbook -i inventory setup_lab.yml --ask-vault-pass
+```
+
+**Option B: Use a password file (Automated)**
+Create a plain text file (e.g., `.vault_pass`) containing only your vault password. This is useful for automated scripts or CI/CD pipelines.
+```bash
+ansible-playbook -i inventory setup_lab.yml --vault-password-file .vault_pass
+```
+
