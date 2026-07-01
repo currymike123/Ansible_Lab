@@ -10,7 +10,7 @@
   vars:
     admin_username: "csadmin"
     student_username: "student"
-    deprecated_username: "test"
+    deprecated_username: "test" # The temporary user to be removed
 
   tasks:
     - name: Ensure local admin account exists
@@ -49,14 +49,22 @@
         append: true
         create_home: true
 
+    - name: Reset the connection to apply user and sudo changes
+      # This is critical. It forces Ansible to drop the current connection (as 'test')
+      # and re-connect for the next play, which will use the new 'csadmin' user.
+      ansible.builtin.meta: reset_connection
+
 - name: Play 2 - Finalize Cleanup
   hosts: new_nucs
   become: true
   # This play will connect as the newly created admin user.
   vars:
     admin_username: "csadmin"
-    deprecated_username: "test"
     ansible_user: "{{ admin_username }}"
+    # We must override the become password provided on the command line.
+    # The 'csadmin' user has passwordless sudo, so we provide an empty
+    # password to prevent Ansible from using the old (and incorrect) one.
+    ansible_become_pass: ""
   
   tasks:
     - name: Remove the old Test account
